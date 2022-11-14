@@ -12,6 +12,8 @@ import * as ImagePicker from 'expo-image-picker';
 import useAuth from '../../security/useAuth';
 import useAxiosPrivate from '../../security/useAxiosPrivate';
 import { Formik } from 'formik';
+import * as FileSystem from 'expo-file-system';
+import { FileSystemUploadType } from 'expo-file-system';
 
 const { height } = Dimensions.get("screen");
 
@@ -34,6 +36,7 @@ export default function AddPatternFirst({ navigation }) {
   const [littleDescription, setLittleDescription] = useState();
 
   const axiosPrivate = useAxiosPrivate();
+  const { auth } = useAuth();
 
   useEffect(() => {
     getCrafts();
@@ -85,26 +88,40 @@ export default function AddPatternFirst({ navigation }) {
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 3],
+      aspect: [1, 1],
       quality: 1,
     });
-    console.log(result);
+    
+    console.log("result", result);
     if (!result.cancelled) {
       setImage(result.uri);
+      const fd = new FormData();
+      fd.append("data", result);
+      const uploadResult = await FileSystem.uploadAsync('http://localhost:8000/patterns/upload/', result.uri, {
+        httpMethod: 'POST',
+        uploadType: FileSystemUploadType.MULTIPART,
+        fieldName: 'data',
+        options: {
+          Authorization: `Bearer ${auth?.token}`,
+        }
+      });
+      console.log("HHHH", uploadResult);
     }
+    console.log("image ", result)
   };
 
   const data = [
-    {key:'1',value:'English'},
-    {key:'3',value:'Spanish'},
-    {key:'2',value:'Russian'},
-  ];
+    {key:'BEGINNER',value:'BEGINNER'},
+    {key:'INTERMEDIATE',value:'INTERMEDIATE'},
+    {key:'ADVANCED',value:'ADVANCED'},
+  ];    
 
   const handleSubmit = () => {
-    setPattern({patternName, craft, category, difficultyLevel, language, price, littleDescription});
+    setPattern({patternName, craft, category, difficultyLevel, language, currency, price, littleDescription});
     console.log(pattern);
+    console.log(image);
   }
 
   const [fontsLoaded] = useFonts({
@@ -128,7 +145,7 @@ return (
       behavior={Platform.OS === "ios" ? "padding" : null}
       style={{ flex: 1 }}>
       
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={{ flex: 1 }}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.inner}>
             <View>
@@ -207,9 +224,6 @@ return (
                   <Text style={styles.buttonText}>save</Text>
                 </TouchableOpacity>
               </View>
-            <TouchableOpacity style={{borderStyle: "solid"}} onPress={handleSubmit}>
-              <Text>add pattern</Text>
-            </TouchableOpacity>
             </View>
           </TouchableWithoutFeedback>
       </SafeAreaView>
@@ -221,9 +235,6 @@ return (
 
 
 const styles = StyleSheet.create({
-  container: {
-      flex: 1,
-  },
   inner: {
       flex: 1,
       justifyContent: "flex-end",

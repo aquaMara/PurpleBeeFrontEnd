@@ -1,5 +1,5 @@
 import axios from 'axios';
-const BASE_URL = 'http://192.168.100.105:8080';
+const BASE_URL = 'http://192.168.134.249:8080';
 
 export default axios.create({
     baseURL: BASE_URL
