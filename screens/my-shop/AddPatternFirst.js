@@ -1,5 +1,5 @@
 import { Dimensions, StyleSheet, Text, View, Image, Button, SafeAreaView, ScrollView, TouchableOpacity, TextInput } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import SelectList from 'react-native-dropdown-select-list';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, ImageBackground  } from 'react-native';
@@ -9,13 +9,11 @@ import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 //import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 // import ImagePicker from 'react-native-image-crop-picker';
 import * as ImagePicker from 'expo-image-picker';
-import InputScrollView from 'react-native-input-scroll-view';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-
+import useAuth from '../../security/useAuth';
+import useAxiosPrivate from '../../security/useAxiosPrivate';
 import { Formik } from 'formik';
 
 const { height } = Dimensions.get("screen");
-
 
 
 export default function AddPatternFirst({ navigation }) {
@@ -24,11 +22,65 @@ export default function AddPatternFirst({ navigation }) {
   const [pattern, setPattern] = useState({});
   const [patternName, setPatternName] = useState();
   const [craft, setCraft] = useState();
+  const [crafts, setCrafts] = useState([]);
   const [category, setCategory] = useState();
+  const [categories, setCategories] = useState([]);
   const [difficultyLevel, setDifficultyLevel] = useState();
   const [language, setLanguage] = useState();
+  const [languages, setLanguages] = useState([]);
   const [price, setPrice] = useState();
+  const [currency, setCurrency] = useState();
+  const [currencies, setCurrencies] = useState([]);
   const [littleDescription, setLittleDescription] = useState();
+
+  const axiosPrivate = useAxiosPrivate();
+
+  useEffect(() => {
+    getCrafts();
+    getCategories();
+    getLanguages();
+    getCurrencies();
+  }, [])
+
+  const getCrafts = async () => {
+    const response = await axiosPrivate.get("/craft")
+    .then((res) => {
+      console.log("Craft", res.data)
+      let newArray = res.data.map( (item) => { return {key: item.id, value: item.name} } )
+      setCrafts(newArray);
+    })
+    .catch( (e) => { console.log("Craft error ", e) } );
+  }
+
+  const getCategories = async () => {
+    const response = await axiosPrivate.get("/category")
+    .then((res) => {
+      console.log("Category", res.data)
+      let newArray = res.data.map( (item) => { return {key: item.id, value: item.name} } )
+      setCategories(newArray);
+    })
+    .catch( (e) => { console.log("Category error ", e) } );
+  }
+
+  const getLanguages = async () => {
+    const response = await axiosPrivate.get("/language")
+    .then((res) => {
+      console.log("Language", res.data)
+      let newArray = res.data.map( (item) => { return {key: item.id, value: item.name} } )
+      setLanguages(newArray);
+    })
+    .catch( (e) => { console.log("Language error ", e) } );
+  }
+
+  const getCurrencies = async () => {
+    const response = await axiosPrivate.get("/currency")
+    .then((res) => {
+      console.log("Currency", res.data)
+      let newArray = res.data.map( (item) => { return {key: item.id, value: item.name} } )
+      setCurrencies(newArray);
+    })
+    .catch( (e) => { console.log("Currency error ", e) } );
+  }
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -100,7 +152,7 @@ return (
                 dropdownTextStyles={styles.dropdownText}
                 searchPlaceholder="craft"
                 setSelected={setCraft} 
-                data={data} 
+                data={crafts} 
                 onSelect={console.log(craft)} />
               <SelectList 
                 boxStyles={styles.select}
@@ -109,7 +161,7 @@ return (
                 dropdownTextStyles={styles.dropdownText}
                 searchPlaceholder="category"
                 setSelected={setCategory} 
-                data={data} 
+                data={categories} 
                 onSelect={console.log(category)} />
               <SelectList 
                 boxStyles={styles.select}
@@ -118,7 +170,7 @@ return (
                 dropdownTextStyles={styles.dropdownText}
                 searchPlaceholder="language"
                 setSelected={setLanguage} 
-                data={data} 
+                data={languages} 
                 onSelect={console.log(language)} />
               <SelectList 
                 boxStyles={styles.select}
@@ -135,6 +187,15 @@ return (
                 keyboardType="numeric"
                 placeholder="price"
                 placeholderTextColor={"gray"} />
+              <SelectList 
+                boxStyles={styles.select}
+                inputStyles={styles.dropdownText}
+                dropdownStyles={styles.select}
+                dropdownTextStyles={styles.dropdownText}
+                searchPlaceholder="currency"
+                setSelected={setCurrency} 
+                data={currencies} 
+                onSelect={console.log(currency)} />
               <TextInput style={styles.inputArea}
                 multiline
                 numberOfLines={4}
@@ -146,7 +207,7 @@ return (
                   <Text style={styles.buttonText}>save</Text>
                 </TouchableOpacity>
               </View>
-            <TouchableOpacity style={{borderStyle: "solid"}} onPress={() => navigation.navigate('AddPatternSecond')}>
+            <TouchableOpacity style={{borderStyle: "solid"}} onPress={handleSubmit}>
               <Text>add pattern</Text>
             </TouchableOpacity>
             </View>

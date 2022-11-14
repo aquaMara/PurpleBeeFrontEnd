@@ -11,12 +11,12 @@ const useAxiosPrivate = () => {
         config => {
             if (!config.headers['Authorization']) {
                 config.headers['Authorization'] = `Bearer ${auth?.token}`;
-                console.log("requestIntercept config.headers['Authorization']", config.headers['Authorization']);
-                console.log("requestIntercept config", config);
+                // console.log("requestIntercept config.headers['Authorization']", config.headers['Authorization']);
+                // console.log("requestIntercept config", config);
             }
             if (config.headers['Authorization']) {
-                console.log("2 requestIntercept config.headers['Authorization']", config.headers['Authorization']);
-                console.log("2 requestIntercept config", config);
+                // console.log("2 requestIntercept config.headers['Authorization']", config.headers['Authorization']);
+                // console.log("2 requestIntercept config", config);
             }
             return config;
         }, (error) => Promise.reject(error)
