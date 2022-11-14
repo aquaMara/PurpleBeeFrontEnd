@@ -14,6 +14,7 @@ import useAxiosPrivate from '../../security/useAxiosPrivate';
 import { Formik } from 'formik';
 import * as FileSystem from 'expo-file-system';
 import { FileSystemUploadType } from 'expo-file-system';
+import CheckBox from 'expo-checkbox';
 
 const { height } = Dimensions.get("screen");
 
@@ -22,7 +23,7 @@ export default function AddPatternFirst({ navigation }) {
 
   const [image, setImage] = useState(null);
   const [pattern, setPattern] = useState({});
-  const [patternName, setPatternName] = useState();
+  const [name, setName] = useState();
   const [craft, setCraft] = useState();
   const [crafts, setCrafts] = useState([]);
   const [category, setCategory] = useState();
@@ -34,6 +35,61 @@ export default function AddPatternFirst({ navigation }) {
   const [currency, setCurrency] = useState();
   const [currencies, setCurrencies] = useState([]);
   const [littleDescription, setLittleDescription] = useState();
+  const [patternId, setPatternId] = useState();
+
+  const [liveRows, setLiveRows] = useState(
+    [{
+      rowNumber: "",
+      schema: "",
+      isInfoRow: false,
+      isTitleRow: false
+    }]
+  );
+
+  const addRow = () => {
+    const plusCurrentRow = [...liveRows];
+    plusCurrentRow.push( { rowNumber: "", schema: "", isInfoRow: false, isTitleRow: false } );
+    setLiveRows(plusCurrentRow);
+  }
+
+  const deleteRow = (key) => {
+    console.log(key);
+    const arr = liveRows.filter((input, index) => index != key);
+    setLiveRows(arr)
+  }
+
+  const fillInput = (text, key) => {
+    const plusCurrentRow = [...liveRows];
+    plusCurrentRow[key].schema = text;
+    plusCurrentRow[key].rowNumber = key;
+    setLiveRows(plusCurrentRow);
+  }
+
+  const fillTitle = (choice, key) => {
+    const plusCurrentRow = [...liveRows];
+    plusCurrentRow[key].isTitleRow = choice;
+    plusCurrentRow[key].rowNumber = key;
+    setLiveRows(plusCurrentRow);
+  }
+
+  const fillInfo = (choice, key) => {
+    const plusCurrentRow = [...liveRows];
+    plusCurrentRow[key].isInfoRow = choice;
+    plusCurrentRow[key].rowNumber = key;
+    setLiveRows(plusCurrentRow);
+  }
+
+  const sendLivePattern = () => {
+    setPattern({name, craft, category, difficultyLevel, language, currency, price, littleDescription});
+    console.log("LIVEROWS", liveRows);
+    // save pattern and get id to send livepattern
+    const response = axiosPrivate.post("/patterns", pattern)
+    .then((res) => {
+      console.log("Patterns response", res.data)
+      const response2 = axiosPrivate.post(`/patterns/live/${res.data}`, liveRows)
+    })
+    .catch( (e) => { console.log("Craft error ", e) } );
+  }
 
   const axiosPrivate = useAxiosPrivate();
   const { auth } = useAuth();
@@ -119,9 +175,9 @@ export default function AddPatternFirst({ navigation }) {
   ];    
 
   const handleSubmit = () => {
-    setPattern({patternName, craft, category, difficultyLevel, language, currency, price, littleDescription});
-    console.log(pattern);
-    console.log(image);
+    setPattern({name: name, craftId: craft, categoryId: category, difficultyLevel: difficultyLevel, languageId: language, currencyId: currency, price, littleDescription});
+    console.log("pattern ", pattern);
+    console.log("image ", image);
   }
 
   const [fontsLoaded] = useFonts({
@@ -158,8 +214,8 @@ return (
             </View>
             <View>
               <TextInput style={styles.input}
-                onChangeText={patternName => setPatternName(patternName)}
-                value={patternName}
+                onChangeText={name => setName(name)}
+                value={name}
                 placeholder="name your pattern"
                 placeholderTextColor={"gray"} />
               <SelectList 
@@ -224,6 +280,46 @@ return (
                   <Text style={styles.buttonText}>save</Text>
                 </TouchableOpacity>
               </View>
+              <View style={styles.live}>
+                <Text style={styles.text}>Please, fill the Live Pattern</Text>
+                  {liveRows.map((liveRow, key)=>(
+                <View styles={{ flex:1 }}>
+                  <View style={styles.together}>
+                    <Text style={styles.text}>{key}</Text>
+                    <TextInput style={styles.schemaInput} key={key}
+                      onChangeText={(text)=>fillInput(text, key)}
+                      value={liveRow.schema}
+                      placeholder="schema" placeholderTextColor={"gray"} />
+                    <TouchableOpacity onPress = {()=> deleteRow(key)} style={styles.deleteButton}>
+                      <Text style={styles.buttonText}>X</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.together}>
+                    <View style={styles.checkboxes}>
+                      <CheckBox style={styles.checkbox} key={key}
+                        disabled={false}
+                        value={liveRow.isTitleRow}
+                        onValueChange={(title) => fillTitle(title, key)} />
+                      <Text style={styles.text}>Tick if Title</Text>
+                    </View>
+                    <View style={styles.checkboxes}>
+                      <CheckBox style={styles.checkbox} key={key}
+                        disabled={false}
+                        value={liveRow.isInfoRow}
+                        onValueChange={info => fillInfo(info, key)} />
+                      <Text style={styles.text}>Tick if Info</Text>
+                    </View>
+                  </View>
+                </View>))}
+              <View style={styles.together}>
+                <TouchableOpacity onPress = {addRow} style={styles.button}>
+                  <Text style={styles.buttonText}>add row</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress = {sendLivePattern} style={styles.button}>
+                  <Text style={styles.buttonText}>send</Text>
+                </TouchableOpacity>
+              </View>
+              </View>
             </View>
           </TouchableWithoutFeedback>
       </SafeAreaView>
@@ -241,7 +337,7 @@ const styles = StyleSheet.create({
       alignItems: "center",
   },
   imageContainer: {
-    marginTop: hp(1),
+    marginTop: hp(4),
     width: wp(90),
     height: hp(40),
     borderWidth: 2,
@@ -311,7 +407,66 @@ const styles = StyleSheet.create({
     fontFamily: 'NunitoMedium',
     fontSize: RFValue(16, height),
     color: "#921bfa",
-  }
+  },
+
+
+  live: {
+    marginTop: hp(2),
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderTopRightRadius: 20,
+    borderTopLeftRadius: 20,
+  },
+  text: {
+    fontFamily: 'NunitoMedium',
+    fontSize: RFValue(20, height),
+    color: "#921bfa",
+    alignSelf: 'center'
+  },
+  schemaInput: {
+    borderWidth: 2,
+    color: '#921bfa',
+    borderRadius: 10,
+    padding: 6,
+    width: wp(78),
+    backgroundColor: "white",
+    borderColor: "#921bfa",
+    flexDirection:'row',
+    fontFamily: 'NunitoMedium',
+    fontSize: RFValue(16, height),
+    marginLeft: wp(1),
+  },
+  checkbox: {
+    borderWidth: 2,
+    borderColor: "#921bfa",
+    borderRadius: 10,
+    padding: 16,
+  },
+  together: {
+    width: wp(100),
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxes: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: wp(45),
+  },
+  deleteButton: {
+    width: wp(10),
+    height: hp(6),
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#921bfa",
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems:"center",
+    alignSelf: "center",
+    marginLeft: wp(1),
+  },
+
 });
 /*
 '#9754CB',

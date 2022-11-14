@@ -13,7 +13,6 @@ const Stack = createNativeStackNavigator();
 export default function WelcomeNavigation() {
   return (
       <Stack.Navigator>
-        <Stack.Screen name="Ad" component={AddPatternFirst} options={{ headerShown: false }}/>
         <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Registration" component={RegistrationScreen} options={{ headerShown: false }} />
