@@ -6,7 +6,6 @@ import RegistrationScreen from '../screens/auth/RegistrationScreen';
 import EmailScreen from '../screens/auth/EmailScreen';
 import BottomNavigation from './BottomNavigation';
 import AddPatternFirst from '../screens/my-shop/AddPatternFirst';
-import AddPatternSecond from '../screens/my-shop/AddPatternSecond';
 
 const Stack = createNativeStackNavigator();
 // initialRouteName='Welcome'

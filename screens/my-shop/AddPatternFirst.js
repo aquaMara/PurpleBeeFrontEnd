@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, Text, View, Image, Button, SafeAreaView, ScrollView, TouchableOpacity, TextInput } from 'react-native'
+import { Dimensions, StyleSheet, Text, View, Image, SafeAreaView, ScrollView, TouchableOpacity, TextInput } from 'react-native'
 import React, { useEffect } from 'react'
 import SelectList from 'react-native-dropdown-select-list';
 import { useState } from 'react';
@@ -22,7 +22,16 @@ const { height } = Dimensions.get("screen");
 export default function AddPatternFirst({ navigation }) {
 
   const [image, setImage] = useState(null);
-  const [pattern, setPattern] = useState({});
+  const [pattern, setPattern] = useState({
+    name: '',
+    craftId: '',
+    categoryId: '',
+    currencyId: '',
+    difficultyLevel: '',
+    languageId: '',
+    littleDescription: '',
+    price: ''
+  });
   const [name, setName] = useState();
   const [craft, setCraft] = useState();
   const [crafts, setCrafts] = useState([]);
@@ -53,9 +62,15 @@ export default function AddPatternFirst({ navigation }) {
   }
 
   const deleteRow = (key) => {
+    /*
     console.log(key);
     const arr = liveRows.filter((input, index) => index != key);
     setLiveRows(arr)
+    */
+    setLiveRows([
+      ...liveRows.slice(0, key),
+      ...liveRows.slice(key + 1)
+    ]);
   }
 
   const fillInput = (text, key) => {
@@ -82,13 +97,15 @@ export default function AddPatternFirst({ navigation }) {
   const sendLivePattern = () => {
     setPattern({name, craft, category, difficultyLevel, language, currency, price, littleDescription});
     console.log("LIVEROWS", liveRows);
-    // save pattern and get id to send livepattern
-    const response = axiosPrivate.post("/patterns", pattern)
+    console.log("PATTERN", pattern);
+    console.log("USERNAME", auth.username)
+    // save pattern and get id to send livepattern  // send pattern with username
+    const response = axiosPrivate.post(`/pattern/${auth.username}`, pattern)
     .then((res) => {
       console.log("Patterns response", res.data)
-      const response2 = axiosPrivate.post(`/patterns/live/${res.data}`, liveRows)
+      const response2 = axiosPrivate.post(`/live-row/${res.data}`, liveRows)
     })
-    .catch( (e) => { console.log("Craft error ", e) } );
+    .catch( (e) => { console.log("Pattern error ", e) } );
   }
 
   const axiosPrivate = useAxiosPrivate();
@@ -174,11 +191,7 @@ export default function AddPatternFirst({ navigation }) {
     {key:'ADVANCED',value:'ADVANCED'},
   ];    
 
-  const handleSubmit = () => {
-    setPattern({name: name, craftId: craft, categoryId: category, difficultyLevel: difficultyLevel, languageId: language, currencyId: currency, price, littleDescription});
-    console.log("pattern ", pattern);
-    console.log("image ", image);
-  }
+  
 
   const [fontsLoaded] = useFonts({
     NunitoLight: require('../../assets/fonts/Nunito-Light.ttf'),
@@ -192,6 +205,12 @@ export default function AddPatternFirst({ navigation }) {
   if (!fontsLoaded) {
     return null;
   }
+
+  const handleSubmit = () => {
+    //setPattern({name: name, craftId: craft, categoryId: category, difficultyLevel: difficultyLevel, languageId: language, currencyId: currency, price, littleDescription});
+    console.log("pattern ", pattern);
+    console.log("image ", image);
+  }
   
 // https://docs.expo.dev/versions/latest/sdk/imagepicker/
 return (
@@ -200,7 +219,6 @@ return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : null}
       style={{ flex: 1 }}>
-      
       <SafeAreaView style={{ flex: 1 }}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.inner}>
@@ -214,8 +232,17 @@ return (
             </View>
             <View>
               <TextInput style={styles.input}
-                onChangeText={name => setName(name)}
-                value={name}
+                onChangeText={n => setPattern({
+                  name: n,
+                  craftId: pattern.craftId,
+                  categoryId: pattern.categoryId,
+                  currencyId: pattern.currencyId,
+                  difficultyLevel: pattern.difficultyLevel,
+                  languageId: pattern.languageId,
+                  littleDescription: pattern.littleDescription,
+                  price: pattern.price
+                })}
+                value={pattern.name}
                 placeholder="name your pattern"
                 placeholderTextColor={"gray"} />
               <SelectList 
@@ -224,7 +251,10 @@ return (
                 dropdownStyles={styles.select}
                 dropdownTextStyles={styles.dropdownText}
                 searchPlaceholder="craft"
-                setSelected={setCraft} 
+                setSelected={cr => setPattern({
+                  ...pattern,
+                  craftId: cr
+                })} 
                 data={crafts} 
                 onSelect={console.log(craft)} />
               <SelectList 
@@ -233,7 +263,7 @@ return (
                 dropdownStyles={styles.select}
                 dropdownTextStyles={styles.dropdownText}
                 searchPlaceholder="category"
-                setSelected={setCategory} 
+                setSelected={ct => setPattern({...pattern, categoryId: ct})} 
                 data={categories} 
                 onSelect={console.log(category)} />
               <SelectList 
@@ -242,7 +272,7 @@ return (
                 dropdownStyles={styles.select}
                 dropdownTextStyles={styles.dropdownText}
                 searchPlaceholder="language"
-                setSelected={setLanguage} 
+                setSelected={lng => setPattern({...pattern, languageId: lng})} 
                 data={languages} 
                 onSelect={console.log(language)} />
               <SelectList 
@@ -251,12 +281,12 @@ return (
                 dropdownStyles={styles.select}
                 dropdownTextStyles={styles.dropdownText}
                 searchPlaceholder="difficultyLevel"
-                setSelected={setDifficultyLevel} 
+                setSelected={dfl => setPattern({...pattern, difficultyLevel: dfl})} 
                 data={data} 
                 onSelect={console.log(difficultyLevel)} />
               <TextInput style={styles.input}
-                onChangeText={price => setPrice(price)}
-                value={price}
+                onChangeText={pr => setPattern({...pattern, price: pr})}
+                value={pattern.price}
                 keyboardType="numeric"
                 placeholder="price"
                 placeholderTextColor={"gray"} />
@@ -266,14 +296,14 @@ return (
                 dropdownStyles={styles.select}
                 dropdownTextStyles={styles.dropdownText}
                 searchPlaceholder="currency"
-                setSelected={setCurrency} 
+                setSelected={cru => setPattern({...pattern, currencyId: cru})} 
                 data={currencies} 
                 onSelect={console.log(currency)} />
               <TextInput style={styles.inputArea}
                 multiline
                 numberOfLines={4}
-                onChangeText={littleDescription => setLittleDescription(littleDescription)}
-                value={littleDescription}
+                onChangeText={ld => setPattern({...pattern, littleDescription:ld})}
+                value={pattern.littleDescription}
                 placeholder="little description of your pattern"
                 placeholderTextColor={"gray"} />
                 <TouchableOpacity onPress={handleSubmit} style={styles.button}>
@@ -337,7 +367,7 @@ const styles = StyleSheet.create({
       alignItems: "center",
   },
   imageContainer: {
-    marginTop: hp(4),
+    marginTop: hp(1),
     width: wp(90),
     height: hp(40),
     borderWidth: 2,
