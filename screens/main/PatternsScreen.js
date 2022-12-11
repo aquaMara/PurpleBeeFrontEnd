@@ -37,6 +37,16 @@ export default function PatternsPage({ navigation }) {
     .catch( (e) => { console.log("Patterns error ", e) } );
   }
 
+  const searchByName = () => {
+    console.log(search);
+    const response = axiosPrivate.get(`/pattern/all/${search}`)
+    .then((res) => {
+      console.log("PATTERNS", res.data)
+      setPatterns(res.data);      
+    })
+    .catch( (e) => { console.log("Patterns error ", e) } );
+  }
+
   useEffect(() => {
     getPatterns();
   }, []);
@@ -57,23 +67,12 @@ export default function PatternsPage({ navigation }) {
     return null
   }
 
-  const searchByName = () => {
-    console.log(search);
-    const response = axiosPrivate.get(`/pattern/all/${search}`)
-    .then((res) => {
-      console.log("PATTERNS", res.data)
-      setPatterns(res.data);      
-    })
-    .catch( (e) => { console.log("Patterns error ", e) } );
-  }
-
-
   return (
     <ImageBackground source={require('../../assets/images/bigbees.jpg')} resizeMode='cover'  style={{ flex: 1 }}>
       {
         patterns.length === 0 ? ( <Text>noooooooooooooooooooo</Text> ) 
         : (
-        <ScrollView style={styles.inner} nestedScrollEnabled={true} horizontal={false}>
+        <SafeAreaView style={styles.inner} nestedScrollEnabled={true} horizontal={false}>
           <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', marginBottom: hp(2)}}>
             <TextInput style={styles.input}
                   onChangeText={n => setSearch(n)}
@@ -84,8 +83,7 @@ export default function PatternsPage({ navigation }) {
               <Text style={styles.buttonText}></Text>
             </TouchableOpacity>
           </View>
-        <ScrollView style={styles.inner} nestedScrollEnabled={true} horizontal={true}>
-          <FlatList keyExtractor={(item) => item.id} data={patterns} numColumns={2} 
+        <FlatList keyExtractor={(item) => item.id} data={patterns} numColumns={2} 
             style={{ flex: 1}}
             nestedScrollEnabled={true}
             columnWrapperStyle={{display: 'flex', justifyContent: 'space-between'}}
@@ -97,8 +95,7 @@ export default function PatternsPage({ navigation }) {
                 </TouchableOpacity>
               </View>
             )} />
-        </ScrollView>
-        </ScrollView>
+        </SafeAreaView>
         )}
     </ImageBackground>
   )
@@ -107,7 +104,8 @@ export default function PatternsPage({ navigation }) {
 const styles = StyleSheet.create({
   inner: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.6)',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    marginTop: hp(4),
   },
   imageContainer: {
     marginTop: hp(4),

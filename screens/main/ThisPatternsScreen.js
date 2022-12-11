@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, Text, View, Image, SafeAreaView, ScrollView, TouchableOpacity, TextInput } from 'react-native'
+import { Dimensions, StyleSheet, Text, View, Image, SafeAreaView, ScrollView, TouchableOpacity, TextInput, FlatList } from 'react-native'
 import React, { useEffect } from 'react'
 import SelectList from 'react-native-dropdown-select-list';
 import { useState } from 'react';
@@ -15,6 +15,7 @@ import { Formik } from 'formik';
 import * as FileSystem from 'expo-file-system';
 import { FileSystemUploadType } from 'expo-file-system';
 import CheckBox from 'expo-checkbox';
+import { Rating } from 'react-native-ratings';
 
 const { height } = Dimensions.get("screen");
 
@@ -24,8 +25,9 @@ export default function ThisPatternsScreen({ navigation, route }) {
   const { auth } = useAuth();
   const [pattern, setPattern] = useState({});
   const [payment, setPayment] = useState({});
+  const [comments, setComments] = useState([]);
 
-  useEffect(() => {
+  const getPatterns = () => {
     const response = axiosPrivate.get(`/pattern/${route.params.id}`)
     .then((res) => {
       console.log("Pattern", res.data)
@@ -34,6 +36,19 @@ export default function ThisPatternsScreen({ navigation, route }) {
       console.log("Payment", payment);
     })
     .catch( (e) => { console.log("Pattern error ", e) } );
+  }
+
+  const getComments = () => {
+    const response = axiosPrivate.get(`/comment/${route.params.id}`)
+    .then(res => setComments(res.data))
+    .catch( (e) => { console.log("getComments error ", e) } );
+  }
+
+  useEffect(() => {
+    getPatterns();
+    getComments();
+    console.log('ccc', comments)
+
   }, []);
 
   const acquirePattern = () => {
@@ -62,26 +77,45 @@ export default function ThisPatternsScreen({ navigation, route }) {
   
   return (
     <ImageBackground source={require('../../assets/images/bigbees.jpg')} resizeMode='cover'  style={{ flex: 1 }}>
+      <ScrollView style={{flex: 1, backgroundColor: 'rgba(255,255,255,0.9)'}}>
+      <SafeAreaView >
       {
         pattern === 0 || payment === 0 ? ( <Text>noooooooooooooooooooo</Text> ) 
         : (
-      <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.inner}>
-        <Image source={require('../../assets/images/kitty.jpg')} style={{width: wp(90), height: wp(90)}} resizeMode='cover' />
-        <Text style={styles.title}>{pattern.name}</Text>
-        <Text style={styles.text}>Creator: {pattern.creatorUsername}</Text>
-        <Text style={styles.text}>Craft: {pattern.craftName}</Text>
-        <Text style={styles.text}>Category: {pattern.categoryName}</Text>
-        <Text style={styles.text}>Difficulty: {pattern.difficultyLevel}</Text>
-        <Text style={styles.text}>Language: {pattern.languageName}</Text>
-        <Text style={styles.text}>Price: {pattern.price} {pattern.currencyName}</Text>
-        <Text style={styles.text}>{pattern.littleDescription}</Text>
-        <TouchableOpacity style={styles.button} onPress={acquirePattern}>
-          <Text style={styles.text}>Get Pattern for {pattern.price} {pattern.currencyName}</Text>
-        </TouchableOpacity>
+          <Image source={require('../../assets/images/kitty.jpg')} style={{width: wp(90), height: wp(90)}} resizeMode='cover' />
+          <Text style={styles.title}>{pattern.name}</Text>
+          <Text style={styles.text}>Creator: {pattern.creatorUsername}</Text>
+          <Rating type='heart' ratingCount={5} imageSize={30} startingValue={pattern.avgRate}
+                readonly='true' style={{ alignSelf: 'center'}} />
+          <Text style={styles.text}>Craft: {pattern.craftName}</Text>
+          <Text style={styles.text}>Category: {pattern.categoryName}</Text>
+          <Text style={styles.text}>Difficulty: {pattern.difficultyLevel}</Text>
+          <Text style={styles.text}>Language: {pattern.languageName}</Text>
+          <Text style={styles.text}>Price: {pattern.price} {pattern.currencyName}</Text>
+          <Text style={styles.text}>{pattern.littleDescription}</Text>
+          <TouchableOpacity style={styles.button} onPress={acquirePattern}>
+            <Text style={styles.text}>Get Pattern for {pattern.price} {pattern.currencyName}</Text>
+          </TouchableOpacity>
         </View>
-      </SafeAreaView>
         )}
+        {
+          comments &&
+          (
+            <View>
+            <Text style={[styles.title, {marginTop: hp(3), marginBottom: hp(2)}]}>***Comments Section***</Text>
+            {comments.map((item, index) => {
+              return (
+                <View key={index} style={styles.comment}>
+                  <Text style={styles.text}>{item.body}</Text>
+                </View>
+              );
+            })}
+        </View>
+          )
+        }
+      </SafeAreaView>
+        </ScrollView>
     </ImageBackground>
   )
 }
@@ -89,7 +123,6 @@ export default function ThisPatternsScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   inner: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.8)',
     alignItems: 'center',
   },
   button: {
@@ -124,4 +157,10 @@ const styles = StyleSheet.create({
     color: "#921bfa",
     alignSelf: 'center',
   },
+  comment: {
+    borderWidth: 2,
+    borderColor: 'yellow',
+    marginBottom: hp(1),
+    padding: 10,
+  }
 })

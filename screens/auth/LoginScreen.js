@@ -66,6 +66,7 @@ export default function LoginScreen({ navigation }) {
                       setAuth({ username, role, token});
                       if (role === "USER") {
                           navigation.navigate("Root");
+                          //navigation.reset("Root");
                       }
                       if (role === "ADMIN") {
                           //navigate("/admin/subjects");

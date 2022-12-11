@@ -314,7 +314,7 @@ return (
                 <Text style={styles.text}>Please, fill the Live Pattern</Text>
                   {liveRows.map((liveRow, key)=>(
                 <View styles={{ flex:1 }}>
-                  <View style={styles.together}>
+                  <View style={styles.together} key={key}>
                     <Text style={styles.text}>{key}</Text>
                     <TextInput style={styles.schemaInput} key={key}
                       onChangeText={(text)=>fillInput(text, key)}

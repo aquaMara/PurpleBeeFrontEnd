@@ -34,22 +34,13 @@ const [fontsLoaded] = useFonts({
     }}>
       <Tab.Screen name="Main" component={MainNavigation} 
         options={{
-          tabBarLabel: 'main',
-          headerTitle: 'Purple Bee Main',
-          headerTintColor: '#921bfa',
-          headerTitleStyle: {
-            fontFamily: 'NunitoBold',
-            fontSize: RFValue(25, height),
-          },
-          headerStyle: {
-            backgroundColor: '#FEE36E'
-          },
+          tabBarLabel: 'main', headerShown: false,
           tabBarIcon: ({size,focused,color}) => {
             return (<Image style={{ width: size, height: size }} source={require('../assets/images/nav_honey.png')} />);
           },}}/>
       <Tab.Screen name="Patterns" component={MyPatternsNavigation} 
         options={{
-            tabBarLabel: 'patterns',headerTintColor: '#921bfa',
+            tabBarLabel: 'patterns', headerTintColor: '#921bfa',
             headerTitle: 'My Patterns',
             headerTintColor: '#921bfa',
             headerTitleStyle: {
@@ -99,21 +90,74 @@ const [fontsLoaded] = useFonts({
 const styles = StyleSheet.create({})
 
 /*
-<Tab.Screen name="Shop" component={MyPatternsShop} 
+<Tab.Navigator 
+    initialRouteName="Main"
+    screenOptions={{
+      tabBarActiveTintColor: '#FEE36E',
+      tabBarInactiveTintColor: 'white',
+      tabBarActiveBackgroundColor: '#6237A0',
+      tabBarInactiveBackgroundColor: '#6237A0',
+    }}>
+      <Tab.Screen name="Main" component={MainNavigation} 
         options={{
-            tabBarLabel: 'shop',
+          tabBarLabel: 'main',
+          headerTitle: 'Purple Bee Main',
+          headerTintColor: '#921bfa',
+          headerTitleStyle: {
+            fontFamily: 'NunitoBold',
+            fontSize: RFValue(25, height),
+          },
+          headerStyle: {
+            backgroundColor: '#FEE36E'
+          },
+          tabBarIcon: ({size,focused,color}) => {
+            return (<Image style={{ width: size, height: size }} source={require('../assets/images/nav_honey.png')} />);
+          },}}/>
+      <Tab.Screen name="Patterns" component={MyPatternsNavigation} 
+        options={{
+            tabBarLabel: 'patterns', headerTintColor: '#921bfa',
+            headerTitle: 'My Patterns',
+            headerTintColor: '#921bfa',
+            headerTitleStyle: {
+              fontFamily: 'NunitoBold',
+              fontSize: RFValue(25, height),
+            },
+            headerStyle: {
+              backgroundColor: '#FEE36E'
+            },
+            tabBarIcon: ({size,focused,color}) => {
+            return (<Image style={{ width: size, height: size }} source={require('../assets/images/nav_honeycomb.png')} />);
+            },}} />
+      <Tab.Screen name="Shop" component={ShopNavigation} 
+        options={{
+            tabBarLabel: 'shop',headerTintColor: '#921bfa',
+            headerTitle: 'My Shop',
+            headerTintColor: '#921bfa',
+            headerTitleStyle: {
+              fontFamily: 'NunitoBold',
+              fontSize: RFValue(25, height),
+            },
+            headerStyle: {
+              backgroundColor: '#FEE36E'
+            },
             tabBarIcon: ({size,focused,color}) => {
             return (<Image style={{ width: size, height: size }} source={require('../assets/images/nav_beehive.png')} />);
             },}} />
-            */
+      <Tab.Screen name="Account" component={AccountScreen} 
+        options={{
+            tabBarLabel: 'account',headerTintColor: '#921bfa',
+            headerTitle: 'Account',
+            headerTintColor: '#921bfa',
+            headerTitleStyle: {
+              fontFamily: 'NunitoBold',
+              fontSize: RFValue(25, height),
+            },
+            headerStyle: {
+              backgroundColor: '#FEE36E'
+            },
+            tabBarIcon: ({size,focused,color}) => {
+            return (<Image style={{ width: size, height: size }} source={require('../assets/images/bee.png')} />);
+            },}} />
+    </Tab.Navigator>
 
-/*
-title: 'My home',
-          headerStyle: {
-            backgroundColor: 'white',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-          */
+    */
