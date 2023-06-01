@@ -7,7 +7,6 @@ import { useFonts } from 'expo-font';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import axios from '../../security/axios';
-//import axios from 'axios';
 
 const { height } = Dimensions.get("screen");
 
@@ -104,7 +103,7 @@ export default function RegistrationScreen({ navigation }) {
 
   const handleSubmit = async () => {
     const person = {username, email, password};
-    console.log(person);
+    //console.log(person);
     // navigation.navigate("Email")
     try {
       const response = await axios.post("/signup", person)
@@ -126,7 +125,7 @@ export default function RegistrationScreen({ navigation }) {
 
 
   return (
-    <ImageBackground source={require('../../assets/images/bigbees.jpg')} resizeMode='cover' style={{ flex: 1 }}>
+    <ImageBackground source={require('../../assets/images/darkbees.jpg')} resizeMode='cover' style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : null} style={{ flex: 1 }}>
         <SafeAreaView style={{ flex: 1 }}>
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -134,43 +133,43 @@ export default function RegistrationScreen({ navigation }) {
               <View style={styles.box}> 
                 <View style={styles.quoteBox}>
                   <Text style={styles.title}>Purple Bee</Text>
-                  <Text style={styles.quote}>Life is a flower, of which love is honey</Text>
+                  <Text style={styles.quote}>Добро пожаловать!</Text>
                 </View>
                 <View style={styles.block}>
-                  {usernameError && <Text style={styles.error}>From 6 to 16 symbols, only letters, numbers and underscore</Text>}
-                  {uniquenessError && <Text style={styles.error}>Username exists</Text>}
+                  {usernameError && <Text style={styles.error}>От 6 до 16 символов, только буквы, цифры и нижнее подчёркивание</Text>}
+                  {uniquenessError && <Text style={styles.error}>Логин сущестует</Text>}
                   <TextInput style={styles.input}
                     onChangeText={username => checkUsername(username)}
                     value={username} autoCapitalize="none"
-                    placeholder="username" placeholderTextColor={"gray"}/>
+                    placeholder="логин" placeholderTextColor={"gray"}/>
                 </View>
                 <View style={styles.block}>
-                  {emailError && <Text style={styles.error}>Email should be valid</Text>}
+                  {emailError && <Text style={styles.error}>Email должен быть валидным</Text>}
                   <TextInput style={styles.input}
                     onChangeText={email => setEmail(email)}
                     value={email} autoCapitalize="none" keyboardType='email-address'
                     placeholder="email" placeholderTextColor={"gray"}/>
                 </View>
                 <View style={styles.block}>
-                  {passwordError && <Text style={styles.error}>From 6 to 16 symbols, only letters, numbers, underscore, star and exclamation mark</Text>}
-                  {securityError && <Text style={styles.error}>At least one uppercase letter, one number, one permitted special character</Text>}
+                  {passwordError && <Text style={styles.error}>От 6 до 16 символов, только латинские буквы, цифры, нижнее подчёркивание, звёздочка, восклицательный знак</Text>}
+                  {securityError && <Text style={styles.error}>Хотя бы одна большая буква, одна цифра, один разрешённый специальный символ</Text>}
                   <View style={styles.sticked}>
                   <TextInput style={styles.input}
                     onChangeText={password => checkPassword(password)}
                     value={password} autoCapitalize="none" secureTextEntry={passwordVisibility}
-                    placeholder="password" placeholderTextColor={"gray"}/>
+                    placeholder="пароль" placeholderTextColor={"gray"}/>
                     <TouchableOpacity style={styles.icon} onPress={() => setPasswordVisibility(!passwordVisibility)}>
                       <Image source={require('../../assets/images/bee.png')} style={styles.image} />
                     </TouchableOpacity>
                     </View>
                 </View>
                 <View style={styles.block}>
-                  {passwordCheckError && <Text style={styles.error}>Passwords should be equal</Text>}
+                  {passwordCheckError && <Text style={styles.error}>Пароли должны совпадать</Text>}
                   <View style={styles.sticked}>
                   <TextInput style={styles.input}
                     onChangeText={passwordCheck => checkPasswordCheck(passwordCheck)}
                     value={passwordCheck} autoCapitalize="none" secureTextEntry={passwordCheckVisibility}
-                    placeholder="re-type password" placeholderTextColor={"gray"}/>
+                    placeholder="повтор пароля" placeholderTextColor={"gray"}/>
                     <TouchableOpacity style={styles.icon} onPress={() => setPasswordCheckVisibility(!passwordCheckVisibility)}>
                       <Image source={require('../../assets/images/bee.png')} style={styles.image} />
                     </TouchableOpacity>
@@ -178,7 +177,7 @@ export default function RegistrationScreen({ navigation }) {
                 </View>
                 <TouchableOpacity disabled={isDisabled} 
                   style={(isDisabled) ? styles.buttonDisabled : styles.button} 
-                  onPress={handleSubmit}><Text style={styles.buttonText}>sign up</Text>
+                  onPress={handleSubmit}><Text style={styles.buttonText}>регистрация</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -280,5 +279,6 @@ const styles = StyleSheet.create({
     color: 'yellow',
     fontFamily: 'NunitoMedium',
     fontSize: RFValue(14, height),
+    textAlign: 'left'
   },
 })

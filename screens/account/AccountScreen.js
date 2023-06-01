@@ -1,4 +1,4 @@
-import { ImageBackground, ScrollView, SafeAreaView, Dimensions, StyleSheet, Text, View, TouchableOpacity, TextInput, Picker } from 'react-native'
+import { ImageBackground, ScrollView, SafeAreaView, Dimensions, StyleSheet, Text, View, TouchableOpacity, TextInput, Picker, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard  } from 'react-native';
 import { useFonts } from 'expo-font';
@@ -8,6 +8,7 @@ import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import SelectList from 'react-native-dropdown-select-list'
 import useAuth from '../../security/useAuth';
 import useAxiosPrivate from '../../security/useAxiosPrivate';
+import { useNavigation } from '@react-navigation/native';
 
 const { height } = Dimensions.get("screen");
 
@@ -22,6 +23,16 @@ export default function AccountScreen({ navigation }) {
     getLanguages();
     getCountries();
   }, [])
+
+  const [letter, setLetter] = useState({});
+  const addLetter = () => {
+    const response = axiosPrivate.post(`/user/support/${appUser.username}`, {body: letter, title: 'Support Letter'})
+    .then((res) => {
+      Alert.alert('Спасибо за обращение!', "В течение трёх дней ответ придёт к Вам на почту")
+    })
+    .catch( (e) => { console.log("addLetter error ", e) } );
+    setLetter({});
+  }
 
   const [appUserSettings, setAppUserSettings] = useState({
     languageId: '',
@@ -74,6 +85,43 @@ export default function AccountScreen({ navigation }) {
     .catch( (e) => { console.log("APPUSER error ", e) } );
   }
 
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Внимание!',
+      'Вы уверены, что хотите удалить аккаунт?',
+      [
+        {
+          text: 'Удалить мой аккаунт',
+          onPress: () => deleteAccount(),
+          style: 'default',
+        },
+        {
+          text: 'Отмена',
+          onPress: () => Alert.alert('Ваш аккаунт не будет удалён'),
+          style: 'cancel',
+        },
+      ],
+      {
+        cancelable: true,
+        onDismiss: () =>
+          Alert.alert(
+            'This alert was dismissed by tapping outside of the alert dialog.',
+          ),
+      },
+    );
+  }
+
+  const deleteAccount = async () => {
+    console.log('ghh');
+    const response = await axiosPrivate.put("/user/delete")
+    .then((res) => {
+      console.log("deleteAccount", res.data);
+      navigation.navigate('Welcome');      
+    })
+    .catch( (e) => { console.log("deleteAccount error ", e) } );
+    
+  }
+
 
   const [fontsLoaded] = useFonts({
     NunitoLight: require('../../assets/fonts/Nunito-Light.ttf'),
@@ -97,42 +145,37 @@ export default function AccountScreen({ navigation }) {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.inner}>
           <View style={styles.common}>
-            <Text style={styles.title}>Username</Text>
-            <Text style={styles.body}>{appUser.username}</Text>
+            <Text style={styles.title}>Логин</Text>
+            <TouchableOpacity style={{borderStyle: "solid"}}>
+              <Text style={styles.body}>{appUser.username}</Text>
+            </TouchableOpacity>
           </View>
           <View style={styles.common}>
             <Text style={styles.title}>Email</Text>
-            <TouchableOpacity style={{borderStyle: "solid"}} onPress={() => navigation.navigate('ChangeEmail')}>
+            <TouchableOpacity style={{borderStyle: "solid"}}>
               <Text style={styles.body}>{appUser.email}</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.common}>
-            <Text style={styles.title}>Instagram</Text>
-            <Text style={styles.body}>{appUser.instagram}</Text>
-          </View>
-          <View style={styles.common}>
-            <Text style={styles.title}>since</Text>
+            <Text style={styles.title}>PurpleBee с</Text>
             <Text style={styles.body}>{appUser.registrationDate.substring(0,10)}</Text>
           </View>
-          <View><Text style={styles.title}>App settings</Text></View>
-          <SelectList 
-            boxStyles={styles.select}
-            inputStyles={styles.dropdownText}
-            dropdownStyles={styles.select}
-            dropdownTextStyles={styles.dropdownText}
-            searchPlaceholder="language"
-            setSelected={lng => setAppUser({...appUser, languageId: lng})} 
-            defaultOption={appUser.languageId}
-            data={languages} />
-          <SelectList 
-            boxStyles={styles.select}
-            inputStyles={styles.dropdownText}
-            dropdownStyles={styles.select}
-            dropdownTextStyles={styles.dropdownText}
-            searchPlaceholder="country"
-            setSelected={cntr => setAppUser({...appUser, countryId: cntr})} 
-            defaultOption={appUser.countryId && appUser.countryId}
-            data={countries} />
+          <View>
+            <Text style={[styles.section]}>***Обратиться в поддержку***</Text>
+            <View>
+              <TextInput style={styles.inputArea}
+                multiline numberOfLines={4}
+                placeholder="Введите Ваше письмо..." placeholderTextColor={"gray"}
+                value={letter} onChangeText={c => setLetter(c)} />
+                <TouchableOpacity onPress={addLetter} style={styles.button}>
+                  <Text style={styles.buttonText}>отправить</Text>
+                </TouchableOpacity>
+            </View>
+          </View>
+          
+          <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteAccount()}>
+              <Text style={styles.buttonText}>удалить аккаунт</Text>
+          </TouchableOpacity>
         </View>
     </TouchableWithoutFeedback>
     </SafeAreaView>
@@ -148,7 +191,7 @@ const styles = StyleSheet.create({
   },
   inner: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    backgroundColor: 'rgba(255,255,255,0.9)',
   },
   common: {
     display: 'flex',
@@ -180,6 +223,84 @@ const styles = StyleSheet.create({
     color: "#921bfa",
     fontFamily: 'NunitoSemiBold',
     fontSize: RFValue(20, height),
-  }
-
+  },
+  section: {
+    marginTop: hp(3),
+    marginBottom: hp(1),
+    width: wp(100),
+    fontFamily: 'NunitoBold',
+    fontSize: RFValue(20, height),
+    color: "#921bfa",
+    textAlign: 'center',
+    textTransform: 'uppercase',
+  },
+  button: {
+    marginTop: hp(0),
+    width: wp(80),
+    height: hp(5),
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "yellow",
+    justifyContent: "center",
+    alignItems:"center",
+    alignSelf: "center",
+    backgroundColor: "yellow",
+  },
+  buttonText: {
+    fontFamily: 'NunitoMedium',
+    fontSize: RFValue(20, height),
+    color: "#921bfa",
+  },
+  inputArea: {
+    borderWidth: 2,
+    color: '#921bfa',
+    borderRadius: 10,
+    padding: 10,
+    width: wp(78),
+    fontFamily: 'NunitoMedium',
+    fontSize: RFValue(16, height),
+    backgroundColor: "white",
+    borderColor: "yellow",
+    marginTop: hp(3),
+    textAlignVertical: 'top',
+    alignSelf: 'center'
+  },
+  deleteButton: {
+    //marginTop: hp(1),
+    //marginBottom: hp(5),
+    //marginTop: 'auto',
+    marginTop: hp(20),
+    width: wp(80),
+    height: hp(5),
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#921bfa",
+    justifyContent: "center",
+    alignItems:"center",
+    alignSelf: "center",
+    backgroundColor: "white",
+  },
 })
+
+/*
+          <View><Text style={styles.title}>App settings</Text></View>
+<SelectList 
+            boxStyles={styles.select}
+            inputStyles={styles.dropdownText}
+            dropdownStyles={styles.select}
+            dropdownTextStyles={styles.dropdownText}
+            searchPlaceholder="language"
+            setSelected={lng => setAppUser({...appUser, languageId: lng})} 
+            defaultOption={appUser.languageId}
+            data={languages} />
+          <SelectList 
+            boxStyles={styles.select}
+            inputStyles={styles.dropdownText}
+            dropdownStyles={styles.select}
+            dropdownTextStyles={styles.dropdownText}
+            searchPlaceholder="country"
+            setSelected={cntr => setAppUser({...appUser, countryId: cntr})} 
+            defaultOption={appUser.countryId && appUser.countryId}
+            data={countries} />
+
+            */

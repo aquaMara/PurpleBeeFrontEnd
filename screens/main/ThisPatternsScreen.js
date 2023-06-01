@@ -1,20 +1,12 @@
 import { Dimensions, StyleSheet, Text, View, Image, SafeAreaView, ScrollView, TouchableOpacity, TextInput, FlatList } from 'react-native'
 import React, { useEffect } from 'react'
-import SelectList from 'react-native-dropdown-select-list';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, ImageBackground  } from 'react-native';
+import { ImageBackground  } from 'react-native';
 import { useFonts } from 'expo-font';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
-//import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-// import ImagePicker from 'react-native-image-crop-picker';
-import * as ImagePicker from 'expo-image-picker';
+import { RFValue } from "react-native-responsive-fontsize";
 import useAuth from '../../security/useAuth';
 import useAxiosPrivate from '../../security/useAxiosPrivate';
-import { Formik } from 'formik';
-import * as FileSystem from 'expo-file-system';
-import { FileSystemUploadType } from 'expo-file-system';
-import CheckBox from 'expo-checkbox';
 import { Rating } from 'react-native-ratings';
 
 const { height } = Dimensions.get("screen");
@@ -26,6 +18,7 @@ export default function ThisPatternsScreen({ navigation, route }) {
   const [pattern, setPattern] = useState({});
   const [payment, setPayment] = useState({});
   const [comments, setComments] = useState([]);
+  const [buttonEnabled, setButtonEnabled] = useState(false);
 
   const getPatterns = () => {
     const response = axiosPrivate.get(`/pattern/${route.params.id}`)
@@ -44,11 +37,20 @@ export default function ThisPatternsScreen({ navigation, route }) {
     .catch( (e) => { console.log("getComments error ", e) } );
   }
 
+  const checkIfAcquired = () => {
+    const response = axiosPrivate.get(`/payment/check/${route.params.id}`)
+    .then((res) => {
+      
+      console.log("checkIfAcquired", res.data);
+      setButtonEnabled(res.data);
+    })
+    .catch( (e) => { console.log("Pattern error ", e) } );
+  }
+
   useEffect(() => {
+    checkIfAcquired();
     getPatterns();
     getComments();
-    console.log('ccc', comments)
-
   }, []);
 
   const acquirePattern = () => {
@@ -59,6 +61,7 @@ export default function ThisPatternsScreen({ navigation, route }) {
     const response = axiosPrivate.post(`/payment/`, payment)
     .then((res) => {
       console.log("Payment", res.data)
+      checkIfAcquired();  // ghhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhf
       alert("Pattern is now yours!")
     })
     .catch( (e) => { console.log("Payment error ", e); alert("Payment error") } );
@@ -83,19 +86,19 @@ export default function ThisPatternsScreen({ navigation, route }) {
         pattern === 0 || payment === 0 ? ( <Text>noooooooooooooooooooo</Text> ) 
         : (
         <View style={styles.inner}>
-          <Image source={require('../../assets/images/kitty.jpg')} style={{width: wp(90), height: wp(90)}} resizeMode='cover' />
+          <Image source={{uri: `http://92.51.39.80:8080/pattern/image/${pattern.id}`}} style={{width: wp(90), height: wp(90)}} resizeMode='cover' />
           <Text style={styles.title}>{pattern.name}</Text>
-          <Text style={styles.text}>Creator: {pattern.creatorUsername}</Text>
+          <Text style={styles.text}>Паттерн от: {pattern.creatorUsername}</Text>
           <Rating type='heart' ratingCount={5} imageSize={30} startingValue={pattern.avgRate}
                 readonly='true' style={{ alignSelf: 'center'}} />
-          <Text style={styles.text}>Craft: {pattern.craftName}</Text>
-          <Text style={styles.text}>Category: {pattern.categoryName}</Text>
-          <Text style={styles.text}>Difficulty: {pattern.difficultyLevel}</Text>
-          <Text style={styles.text}>Language: {pattern.languageName}</Text>
-          <Text style={styles.text}>Price: {pattern.price} {pattern.currencyName}</Text>
+          <Text style={styles.text}>Ремесло: {pattern.craftName}</Text>
+          <Text style={styles.text}>Категория: {pattern.categoryName}</Text>
+          <Text style={styles.text}>Сложность: {pattern.difficultyLevel}</Text>
+          <Text style={styles.text}>Язык: {pattern.languageName}</Text>
+          <Text style={styles.text}>Стоимость: {pattern.price} {pattern.currencyName}</Text>
           <Text style={styles.text}>{pattern.littleDescription}</Text>
-          <TouchableOpacity style={styles.button} onPress={acquirePattern}>
-            <Text style={styles.text}>Get Pattern for {pattern.price} {pattern.currencyName}</Text>
+          <TouchableOpacity style={[styles.button, buttonEnabled && {backgroundColor: 'rgba(255, 255, 0, 0.4)'}]} onPress={acquirePattern} disabled={buttonEnabled}>
+            <Text style={[styles.text, buttonEnabled && {color: 'rgba(146, 27, 250, 0.4)'}]}>Приобрести за {pattern.price} {pattern.currencyName}</Text>
           </TouchableOpacity>
         </View>
         )}
@@ -103,11 +106,11 @@ export default function ThisPatternsScreen({ navigation, route }) {
           comments &&
           (
             <View>
-            <Text style={[styles.title, {marginTop: hp(3), marginBottom: hp(2)}]}>***Comments Section***</Text>
+            <Text style={[styles.title, {marginTop: hp(3), marginBottom: hp(2)}]}>***Комментарии***</Text>
             {comments.map((item, index) => {
               return (
                 <View key={index} style={styles.comment}>
-                  <Text style={styles.text}>{item.body}</Text>
+                  <Text style={[styles.text, {alignSelf: 'center', marginLeft: wp(0)}]}>{item.body}</Text>
                 </View>
               );
             })}
@@ -156,6 +159,8 @@ const styles = StyleSheet.create({
     fontSize: RFValue(23, height),
     color: "#921bfa",
     alignSelf: 'center',
+    alignSelf: 'flex-start',
+    marginLeft: wp(10)
   },
   comment: {
     borderWidth: 2,

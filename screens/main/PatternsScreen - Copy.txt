@@ -1,12 +1,19 @@
-import { Dimensions, StyleSheet, Text, View, Image, SafeAreaView, TouchableOpacity, TextInput } from 'react-native'
+import { Dimensions, StyleSheet, Text, View, Image, SafeAreaView, ScrollView, TouchableOpacity, TextInput, Button } from 'react-native'
 import React, { useEffect } from 'react'
 import { useState } from 'react';
-import { ImageBackground  } from 'react-native';
+import { KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, ImageBackground  } from 'react-native';
 import { useFonts } from 'expo-font';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { RFValue } from "react-native-responsive-fontsize";
+import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
+//import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+// import ImagePicker from 'react-native-image-crop-picker';
+import * as ImagePicker from 'expo-image-picker';
 import useAuth from '../../security/useAuth';
 import useAxiosPrivate from '../../security/useAxiosPrivate';
+import { Formik } from 'formik';
+import * as FileSystem from 'expo-file-system';
+import { FileSystemUploadType } from 'expo-file-system';
+import CheckBox from 'expo-checkbox';
 import { FlatList } from 'react-native';
 // import { FlatList } from 'react-native-gesture-handler';
 import { RefreshControl } from 'react-native';
@@ -69,7 +76,7 @@ export default function PatternsPage({ navigation }) {
   return (
     <ImageBackground source={require('../../assets/images/bigbees.jpg')} resizeMode='cover'  style={{ flex: 1 }}>
       {
-        patterns.length === 0 ? ( <Text></Text> ) 
+        patterns.length === 0 ? ( <Text>noooooooooooooooooooo</Text> ) 
         : (
         <SafeAreaView style={styles.inner} nestedScrollEnabled={true} horizontal={false}
           refreshControl={
@@ -86,9 +93,6 @@ export default function PatternsPage({ navigation }) {
               <Text style={styles.buttonText}></Text>
             </TouchableOpacity>
           </View>
-          <View style={{width: wp(100), height: hp(10)}}>
-
-          </View>
         <FlatList keyExtractor={(item) => item.id} data={patterns} numColumns={2} 
             style={{ flex: 1}}
             nestedScrollEnabled={true}
@@ -99,7 +103,7 @@ export default function PatternsPage({ navigation }) {
             renderItem={ ({item}) => (
               <View style={{width: wp(50), justifyContent: 'center', alignItems: 'center', marginBottom: hp(1)}}>
                 <TouchableOpacity onPress={() => { navigation.navigate('ThisPatternsScreen', {id: item.id}) }}>
-                <Image source={{uri: `http://92.51.39.80:8080/pattern/image/${item.id}`}} style={{width: wp(46), height: wp(46)}} resizeMode='cover' />
+                <Image source={require('../../assets/images/bee3.jpg')} style={{width: wp(46), height: wp(46)}} resizeMode='cover' />
                   <Text style={styles.text}>{item.name}</Text>
                 </TouchableOpacity>
               </View>

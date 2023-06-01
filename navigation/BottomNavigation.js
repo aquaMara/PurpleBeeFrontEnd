@@ -34,13 +34,22 @@ const [fontsLoaded] = useFonts({
     }}>
       <Tab.Screen name="Main" component={MainNavigation} 
         options={{
-          tabBarLabel: 'main', headerShown: false,
+          tabBarLabel: 'главная',
+          headerTitle: 'Purple Bee Main',
+          headerTintColor: '#921bfa',
+          headerTitleStyle: {
+            fontFamily: 'NunitoBold',
+            fontSize: RFValue(25, height),
+          },
+          headerStyle: {
+            backgroundColor: '#FEE36E'
+          },
           tabBarIcon: ({size,focused,color}) => {
             return (<Image style={{ width: size, height: size }} source={require('../assets/images/nav_honey.png')} />);
           },}}/>
       <Tab.Screen name="Patterns" component={MyPatternsNavigation} 
         options={{
-            tabBarLabel: 'patterns', headerTintColor: '#921bfa',
+            tabBarLabel: 'мои паттерны', headerTintColor: '#921bfa',
             headerTitle: 'My Patterns',
             headerTintColor: '#921bfa',
             headerTitleStyle: {
@@ -55,7 +64,7 @@ const [fontsLoaded] = useFonts({
             },}} />
       <Tab.Screen name="Shop" component={ShopNavigation} 
         options={{
-            tabBarLabel: 'shop',headerTintColor: '#921bfa',
+            tabBarLabel: 'магазин',headerTintColor: '#921bfa',
             headerTitle: 'My Shop',
             headerTintColor: '#921bfa',
             headerTitleStyle: {
@@ -70,7 +79,7 @@ const [fontsLoaded] = useFonts({
             },}} />
       <Tab.Screen name="Account" component={AccountScreen} 
         options={{
-            tabBarLabel: 'account',headerTintColor: '#921bfa',
+            tabBarLabel: 'аккаунт',headerTintColor: '#921bfa',
             headerTitle: 'Account',
             headerTintColor: '#921bfa',
             headerTitleStyle: {

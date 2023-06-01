@@ -1,21 +1,14 @@
-import { Dimensions, StyleSheet, Text, View, Image, SafeAreaView, ScrollView, TouchableOpacity, TextInput, Button } from 'react-native'
+import { Dimensions, StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native'
 import React, { useEffect } from 'react'
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, ImageBackground  } from 'react-native';
+import { ImageBackground  } from 'react-native';
 import { useFonts } from 'expo-font';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
-//import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-// import ImagePicker from 'react-native-image-crop-picker';
-import * as ImagePicker from 'expo-image-picker';
+import { RFValue } from "react-native-responsive-fontsize";
 import useAuth from '../../security/useAuth';
 import useAxiosPrivate from '../../security/useAxiosPrivate';
-import { Formik } from 'formik';
-import * as FileSystem from 'expo-file-system';
-import { FileSystemUploadType } from 'expo-file-system';
-import CheckBox from 'expo-checkbox';
 import { FlatList } from 'react-native';
-// import { FlatList } from 'react-native-gesture-handler';
+import { RefreshControl } from 'react-native';
 
 const { height } = Dimensions.get("screen");
 
@@ -34,6 +27,14 @@ export default function MyPatternsScreen({ navigation }) {
     })
     .catch( (e) => { console.log("Patterns error ", e) } );
   }
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = () => {
+    setRefreshing(true);
+    getPatterns();
+    wait(20).then(() => setRefreshing(false));
+    
+  };
 
   useEffect(() => {
     getPatterns();
@@ -59,21 +60,28 @@ export default function MyPatternsScreen({ navigation }) {
   return (
     <ImageBackground source={require('../../assets/images/bigbees.jpg')} resizeMode='cover'  style={{ flex: 1 }}>
       {
-        patterns.length === 0 ? ( <Text style={styles.hello}>You don't have patterns yet</Text> ) 
+        patterns.length === 0 ? ( <Text style={styles.hello}>Пока что у Вас нет паттернов</Text> ) 
         : (
-        <ScrollView style={styles.inner} nestedScrollEnabled={true} horizontal={false}>
+        <ScrollView style={styles.inner} nestedScrollEnabled={true} horizontal={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} 
+            onRefresh={getPatterns} /> 
+        }>
           <View style={styles.helloBox}>
-            <Text style={styles.hello}>Hello {auth.username}! Enjoy your patterns!</Text>
+            <Text style={styles.hello}>
+              Добро пожаловать, {auth.username}!
+              Тут хранятся приобретённые паттерны
+            </Text>
           </View>
-        <ScrollView style={styles.inner} nestedScrollEnabled={true} horizontal={true}>
+        <ScrollView style={[styles.inner, {backgroundColor: 'transparent'}]} nestedScrollEnabled={true} horizontal={true}>
           <FlatList keyExtractor={(item) => item.id} data={patterns} numColumns={2} 
             style={{ flex: 1}}
             nestedScrollEnabled={true}
             columnWrapperStyle={{display: 'flex', justifyContent: 'space-between'}}
             renderItem={ ({item}) => (
-              <View style={{borderWidth: 1, borderColor: 'yellow', width: wp(50), justifyContent: 'center', alignItems: 'center'}}>
-                <Image source={require('../../assets/images/kitty.jpg')} style={styles.image} resizeMode='cover' />
+              <View style={{ width: wp(50), justifyContent: 'center', alignItems: 'center'}}> 
                 <TouchableOpacity onPress={() => { navigation.navigate('LivePatternScreen', {id: item.id}) }}>
+                  <Image source={{uri: `http://92.51.39.80:8080/pattern/image/${item.id}`}} style={styles.image} resizeMode='cover' />
                   <Text style={styles.text}>{item.name}</Text>
                 </TouchableOpacity>
               </View>
@@ -88,16 +96,16 @@ export default function MyPatternsScreen({ navigation }) {
 const styles = StyleSheet.create({
   inner: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.6)',
+    backgroundColor: 'rgba(255,255,255,0.95)',
   },
   image: {
     width: wp(46),
     height: wp(46),
   },
   helloBox: {
-    backgroundColor: 'white',
+    //backgroundColor: 'white',
     width: wp(100),
-    height: hp(5),
+    height: hp(12),
   },
   hello: {
     fontFamily: 'NunitoBold',
@@ -105,6 +113,7 @@ const styles = StyleSheet.create({
     color: "#921bfa",
     alignSelf: 'center',
     marginTop: hp(1),
+    lineHeight: wp(6.5)
   },
   text: {
     fontFamily: 'NunitoMedium',

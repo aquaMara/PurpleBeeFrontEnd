@@ -18,18 +18,21 @@ export default function WelcomeScreen({ navigation }) {
   }
 
   return (
-    <ImageBackground source={require('../../assets/images/darkbees.jpg')} resizeMode='cover' style={{ flex: 1 }}>
+    <ImageBackground source={require('../../assets/images/darkbees.jpg')} imageStyle={{
+      resizeMode: "cover",
+      alignSelf: "flex-end"
+    }} style={{ flex: 1, bottom:0 }}>
       <SafeAreaView style={styles.inner}>
         <View style={styles.box}> 
           <View style={styles.quoteBox}>
             <Text style={styles.title}>Purple Bee</Text>
-            <Text style={styles.quote}>Purple Bee is a free community for individual crafters and small business owners &lt;3</Text>
+            <Text style={styles.quote}>Purple Bee это бесплатное сообщество для индивидуальных ремесленников и обладетелей небольшого бизнеса &lt;3</Text>
           </View>
           <TouchableOpacity style={styles.button} 
-            onPress={() => navigation.navigate('Login')}><Text style={styles.buttonText}>sign in</Text>
+            onPress={() => navigation.navigate('Login')}><Text style={styles.buttonText}>вход</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} 
-            onPress={() => navigation.navigate('Registration')}><Text style={styles.buttonText}>sign up</Text>
+            onPress={() => navigation.navigate('Registration')}><Text style={styles.buttonText}>регистрация</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -67,6 +70,7 @@ const styles = StyleSheet.create({
     fontFamily: 'NunitoBold',
     fontSize: RFValue(23, height),
     textAlign: 'center',
+    lineHeight: hp(3.6)
   },
   button: {
     marginTop: hp(1),

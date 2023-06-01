@@ -32,12 +32,12 @@ export default function EmailScreen({ navigation }) {
       <View style={styles.inner}> 
         <View style={styles.box}> 
           <View style={styles.quoteBox}>
-            <Text style={styles.title}>Welcome to Purple Bee</Text>
-            <Text style={styles.quote}>To complete the registration, please follow the instruction that was sent to your email address</Text>
-            <Text style={styles.ps}>P.S. Check inbox or spam, in case of errors contact support purplebee@gmail.com</Text>
+            <Text style={styles.title}>Добро пожаловать в Purple Bee</Text>
+            <Text style={styles.quote}>Чтобы завершить регистрацию, пожалуйста, следуйте инструкции, которая была отправлена на Ваш почтовый адрес</Text>
+            <Text style={styles.ps}>P.S. Проверьте спам, в случае ошибки сообщите в команду поддержки: purplebee@gmail.com</Text>
           </View>
           <TouchableOpacity style={styles.button} 
-            onPress={() => navigation.navigate('Login')}><Text style={styles.buttonText}>sign in</Text>
+            onPress={() => navigation.navigate('Login')}><Text style={styles.buttonText}>вход</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   },
   box: {
     width: wp(90),
-    height: hp(50),
+    height: hp(55),
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(8, 0, 10, 0.9)',
@@ -68,12 +68,14 @@ const styles = StyleSheet.create({
     fontSize: RFValue(23, height),
     textAlign: 'center',
     marginBottom: hp(2),
+    lineHeight: hp(3.6),
   },
   ps: {
     color: '#921bfa',
     fontFamily: 'NunitoMedium',
     fontSize: RFValue(23, height),
     textAlign: 'center',
+    lineHeight: hp(3)
   },
   title: {
     color: '#921bfa',

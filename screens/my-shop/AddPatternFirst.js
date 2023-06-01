@@ -5,15 +5,10 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, ImageBackground  } from 'react-native';
 import { useFonts } from 'expo-font';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
-//import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-// import ImagePicker from 'react-native-image-crop-picker';
+import { RFValue } from "react-native-responsive-fontsize";
 import * as ImagePicker from 'expo-image-picker';
 import useAuth from '../../security/useAuth';
 import useAxiosPrivate from '../../security/useAxiosPrivate';
-import { Formik } from 'formik';
-import * as FileSystem from 'expo-file-system';
-import { FileSystemUploadType } from 'expo-file-system';
 import CheckBox from 'expo-checkbox';
 
 const { height } = Dimensions.get("screen");
@@ -97,14 +92,31 @@ export default function AddPatternFirst({ navigation }) {
   const sendLivePattern = () => {
     setPattern({name, craft, category, difficultyLevel, language, currency, price, littleDescription});
     console.log("LIVEROWS", liveRows);
-    console.log("PATTERN", pattern);
     console.log("USERNAME", auth.username)
     // save pattern and get id to send livepattern  // send pattern with username
     const response = axiosPrivate.post(`/pattern/${auth.username}`, pattern)
+    
     .then((res) => {
-      console.log("Patterns response", res.data)
+      console.log("Patterns response", res.data);
+      let localUri = image;
+      let filename = localUri.split('/').pop();
+      // Infer the type of the image
+      let match = /\.(\w+)$/.exec(filename);
+      let type = match ? `image/${match[1]}` : `image`;
+      let formData = new FormData();
+      // Assume "photo" is the name of the form field the server expects
+      formData.append('file', { uri: localUri, name: filename, type });
+      fetch(`http://92.51.39.80:8080/pattern/upload/${res.data}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'content-type': 'multipart/form-data',
+          'Authorization': `Bearer ${auth?.token}`
+        },
+      });
       const response2 = axiosPrivate.post(`/live-row/${res.data}`, liveRows)
     })
+    .then(() => navigation.navigate('Shop'))
     .catch( (e) => { console.log("Pattern error ", e) } );
   }
 
@@ -164,26 +176,58 @@ export default function AddPatternFirst({ navigation }) {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 1,
+      quality: 1
     });
+    setImage(result.uri);
     
-    console.log("result", result);
     if (!result.cancelled) {
+      // ImagePicker saves the taken photo to disk and returns a local URI to it
+    
+      
+    }
+    
+    /*
+    
       setImage(result.uri);
       const fd = new FormData();
       fd.append("data", result);
-      const uploadResult = await FileSystem.uploadAsync('http://localhost:8000/patterns/upload/', result.uri, {
+      const headers = {
+        Accept: "application/json",
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${auth?.token}`
+      };
+      const uploadResult = await FileSystem.uploadAsync('http://localhost:8000/pattern/upload/', result.uri, {
         httpMethod: 'POST',
         uploadType: FileSystemUploadType.MULTIPART,
-        fieldName: 'data',
-        options: {
-          Authorization: `Bearer ${auth?.token}`,
-        }
+        fieldName: 'file',
+        headers: headers
       });
       console.log("HHHH", uploadResult);
-    }
     console.log("image ", result)
+    */
   };
+
+  const sendImage = async (patternId) => {
+    //let localUri = result.uri;
+    console.log('pId', patternId)
+    let pId = 8;
+    let localUri = image;
+    let filename = localUri.split('/').pop();
+      // Infer the type of the image
+    let match = /\.(\w+)$/.exec(filename);
+    let type = match ? `image/${match[1]}` : `image`;
+      let formData = new FormData();
+      // Assume "photo" is the name of the form field the server expects
+      formData.append('file', { uri: localUri, name: filename, type });
+      fetch(`http://92.51.39.80:8080/pattern/upload/${pId}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'content-type': 'multipart/form-data',
+          'Authorization': `Bearer ${auth?.token}`
+        },
+      });
+  }
 
   const data = [
     {key:'BEGINNER',value:'BEGINNER'},
@@ -227,7 +271,7 @@ return (
                 {image && <Image source={{ uri: image }} style={styles.image} />}
               </View>
               <TouchableOpacity onPress={pickImage} style={styles.button}>
-                <Text style={styles.buttonText}>add an image</Text>
+                <Text style={styles.buttonText}>Картинка</Text>
               </TouchableOpacity>
             </View>
             <View>
@@ -243,14 +287,14 @@ return (
                   price: pattern.price
                 })}
                 value={pattern.name}
-                placeholder="name your pattern"
+                placeholder="Название паттерна"
                 placeholderTextColor={"gray"} />
               <SelectList 
                 boxStyles={styles.select}
                 inputStyles={styles.dropdownText}
                 dropdownStyles={styles.select}
                 dropdownTextStyles={styles.dropdownText}
-                searchPlaceholder="craft"
+                searchPlaceholder="Ремесло"
                 setSelected={cr => setPattern({
                   ...pattern,
                   craftId: cr
@@ -262,7 +306,7 @@ return (
                 inputStyles={styles.dropdownText}
                 dropdownStyles={styles.select}
                 dropdownTextStyles={styles.dropdownText}
-                searchPlaceholder="category"
+                searchPlaceholder="Категория"
                 setSelected={ct => setPattern({...pattern, categoryId: ct})} 
                 data={categories} 
                 onSelect={console.log(category)} />
@@ -271,7 +315,7 @@ return (
                 inputStyles={styles.dropdownText}
                 dropdownStyles={styles.select}
                 dropdownTextStyles={styles.dropdownText}
-                searchPlaceholder="language"
+                searchPlaceholder="Язык"
                 setSelected={lng => setPattern({...pattern, languageId: lng})} 
                 data={languages} 
                 onSelect={console.log(language)} />
@@ -280,7 +324,7 @@ return (
                 inputStyles={styles.dropdownText}
                 dropdownStyles={styles.select}
                 dropdownTextStyles={styles.dropdownText}
-                searchPlaceholder="difficultyLevel"
+                searchPlaceholder="Уровень сложности"
                 setSelected={dfl => setPattern({...pattern, difficultyLevel: dfl})} 
                 data={data} 
                 onSelect={console.log(difficultyLevel)} />
@@ -288,14 +332,14 @@ return (
                 onChangeText={pr => setPattern({...pattern, price: pr})}
                 value={pattern.price}
                 keyboardType="numeric"
-                placeholder="price"
+                placeholder="Стоимость"
                 placeholderTextColor={"gray"} />
               <SelectList 
                 boxStyles={styles.select}
                 inputStyles={styles.dropdownText}
                 dropdownStyles={styles.select}
                 dropdownTextStyles={styles.dropdownText}
-                searchPlaceholder="currency"
+                searchPlaceholder="Валюта"
                 setSelected={cru => setPattern({...pattern, currencyId: cru})} 
                 data={currencies} 
                 onSelect={console.log(currency)} />
@@ -304,14 +348,14 @@ return (
                 numberOfLines={4}
                 onChangeText={ld => setPattern({...pattern, littleDescription:ld})}
                 value={pattern.littleDescription}
-                placeholder="little description of your pattern"
+                placeholder="Небольшое описание Вашего паттерна"
                 placeholderTextColor={"gray"} />
                 <TouchableOpacity onPress={handleSubmit} style={styles.button}>
-                  <Text style={styles.buttonText}>save</Text>
+                  <Text style={styles.buttonText}>Сохранить</Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.live}>
-                <Text style={styles.text}>Please, fill the Live Pattern</Text>
+                <Text style={styles.text}>Пожалуйста, заполните живой паттерна</Text>
                   {liveRows.map((liveRow, key)=>(
                 <View styles={{ flex:1 }}>
                   <View style={styles.together} key={key}>
@@ -319,7 +363,7 @@ return (
                     <TextInput style={styles.schemaInput} key={key}
                       onChangeText={(text)=>fillInput(text, key)}
                       value={liveRow.schema}
-                      placeholder="schema" placeholderTextColor={"gray"} />
+                      placeholder="Схема" placeholderTextColor={"gray"} />
                     <TouchableOpacity onPress = {()=> deleteRow(key)} style={styles.deleteButton}>
                       <Text style={styles.buttonText}>X</Text>
                     </TouchableOpacity>
@@ -330,23 +374,23 @@ return (
                         disabled={false}
                         value={liveRow.isTitleRow}
                         onValueChange={(title) => fillTitle(title, key)} />
-                      <Text style={styles.text}>Tick if Title</Text>
+                      <Text style={styles.text}>Заголовок</Text>
                     </View>
                     <View style={styles.checkboxes}>
                       <CheckBox style={styles.checkbox} key={key}
                         disabled={false}
                         value={liveRow.isInfoRow}
                         onValueChange={info => fillInfo(info, key)} />
-                      <Text style={styles.text}>Tick if Info</Text>
+                      <Text style={styles.text}>Информация</Text>
                     </View>
                   </View>
                 </View>))}
               <View style={styles.together}>
                 <TouchableOpacity onPress = {addRow} style={styles.button}>
-                  <Text style={styles.buttonText}>add row</Text>
+                  <Text style={styles.buttonText}>Добавить ряд</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress = {sendLivePattern} style={styles.button}>
-                  <Text style={styles.buttonText}>send</Text>
+                  <Text style={styles.buttonText}>Отправить</Text>
                 </TouchableOpacity>
               </View>
               </View>

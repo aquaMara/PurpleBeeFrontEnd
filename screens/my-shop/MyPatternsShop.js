@@ -29,12 +29,12 @@ export default function MyPatternsShop({ navigation }) {
     <SafeAreaView style={{ flex: 1 }}>
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.inner}>
-          <Text style={styles.title}>Hey, Honey!</Text>
-          <Text style={styles.text}>It is your personal shop where you can add patterns with Live Pattern function.
-            The process of pattern creation consists of adding rows corresponding to your pattern schema.
-            Affter you created Live Pattern, the user can cross done rows.</Text>
+          <Text style={styles.title}>Добро пожаловать</Text>
+          <Text style={styles.text}>Это Ваш личный магазин, где можно выкладывать паттерны с функцией живого паттерна.
+            Процесс создания паттерна состоит из добавления строк, которые соответствуют схеме.
+            Функция живого паттерна предоставляет пользователю возможность зачёркивать готовые строки.</Text>
           <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AddPatternFirst')}>
-            <Text style={styles.buttonText}>add pattern</Text>
+            <Text style={styles.buttonText}>добавить паттерн</Text>
           </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
@@ -74,12 +74,14 @@ const styles = StyleSheet.create({
     fontSize: RFValue(25, height),
     color: "#921bfa",
     alignSelf: 'center',
-    textTransform: 'uppercase'
+    textTransform: 'uppercase',
+    padding: wp(3)
   },
   text: {
     fontFamily: 'NunitoBold',
     fontSize: RFValue(23, height),
-    textAlign: 'center',
+    textAlign: 'left',
     color: "#921bfa",
+    lineHeight: hp(3.3)
   },
 })

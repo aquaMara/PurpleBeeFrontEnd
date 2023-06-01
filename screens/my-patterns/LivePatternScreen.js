@@ -1,19 +1,12 @@
 import { Dimensions, StyleSheet, Text, View, Image, SafeAreaView, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native'
 import React, { useEffect } from 'react'
-import SelectList from 'react-native-dropdown-select-list';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, ImageBackground  } from 'react-native';
 import { useFonts } from 'expo-font';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
-//import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-// import ImagePicker from 'react-native-image-crop-picker';
-import * as ImagePicker from 'expo-image-picker';
+import { RFValue } from "react-native-responsive-fontsize";
 import useAuth from '../../security/useAuth';
 import useAxiosPrivate from '../../security/useAxiosPrivate';
-import { Formik } from 'formik';
-import * as FileSystem from 'expo-file-system';
-import { FileSystemUploadType } from 'expo-file-system';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { Rating } from 'react-native-ratings';
 
@@ -72,7 +65,7 @@ export default function LivePatternScreen({ navigation, route }) {
     const response = axiosPrivate.post(`/comment/${pattern.id}`, n)
     .then((res) => {
       console.log("addComment ", res.data);
-      Alert.alert("Your comment is saved!");
+      Alert.alert("Ваш комментарий отправлен!");
       setComment('');
     })
     .catch( (e) => { console.log("addComment error ", e) } );
@@ -100,29 +93,30 @@ export default function LivePatternScreen({ navigation, route }) {
   
   return (
     <ImageBackground source={require('../../assets/images/bigbees.jpg')} resizeMode='cover'  style={{ flex: 1 }}>
-      { pattern === 0 || livePattern.length === 0 ? ( <Text>noooooooooooooooooooo</Text> ) : (
+      { pattern === 0 || livePattern.length === 0 ? ( <Text></Text> ) : (
       <ScrollView>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : null} style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.inner}>
           <View>
-            <Image source={require('../../assets/images/kitty.jpg')} style={{width: wp(90), height: wp(90)}} resizeMode='cover' />
+            <View style={{alignItems: 'center'}}>
+              <Image source={{uri: `http://92.51.39.80:8080/pattern/image/${pattern.id}`}} style={{width: wp(90), height: wp(90)}} resizeMode='cover' />
+            </View>
             <Text style={styles.title}>{pattern.name}</Text>
             <Rating type='star' ratingColor='#921bfa' selectedColor='#921bfa' ratingBackgroundColor='red'
               ratingCount={5} imageSize={30} startingValue={pattern.avgRate}
               ratingImage={require('../../assets/images/hive.png')}
               style={{ alignSelf: 'center'}}
               onFinishRating={ratingCompleted} />
-            <Text style={styles.text}>Creator: {pattern.creatorUsername}</Text>
-            <Text style={styles.text}>Craft: {pattern.craftName}</Text>
-            <Text style={styles.text}>Category: {pattern.categoryName}</Text>
-            <Text style={styles.text}>Difficulty: {pattern.difficultyLevel}</Text>
-            <Text style={styles.text}>Language: {pattern.languageName}</Text>
-            <Text style={styles.text}>Price: {pattern.price} {pattern.currencyName}</Text>
+            <Text style={styles.text}>Паттерн от: {pattern.creatorUsername}</Text>
+            <Text style={styles.text}>Ремесло: {pattern.craftName}</Text>
+            <Text style={styles.text}>Категория: {pattern.categoryName}</Text>
+            <Text style={styles.text}>Сложность: {pattern.difficultyLevel}</Text>
+            <Text style={styles.text}>Язык: {pattern.languageName}</Text>
             <Text style={styles.text}>{pattern.littleDescription}</Text>
           </View>
-          <Text style={[styles.title, {marginTop: hp(3), marginBottom: hp(1)}]}>***Live pattern section***</Text>
+          <Text style={[styles.section]}>***Живой паттерн***</Text>
           <View>
           {livePattern.map((liveRow, key)=>(
             <View style={{display: 'flex', flexDirection: 'row'}}>
@@ -140,14 +134,14 @@ export default function LivePatternScreen({ navigation, route }) {
             />
             </View>))}
           </View>
-          <Text style={[styles.title, {marginTop: hp(3), marginBottom: hp(1)}]}>***Your comment section***</Text>
+          <Text style={[styles.section]}>***Оставьте комментарий***</Text>
           <View>
             <TextInput style={styles.inputArea}
               multiline numberOfLines={4}
-              placeholder="Enter your comment..." placeholderTextColor={"gray"}
+              placeholder="Введите Ваш комментарий..." placeholderTextColor={"gray"}
               value={comment} onChangeText={c => setComment(c)} />
               <TouchableOpacity onPress={addComment} style={styles.button}>
-                <Text style={styles.buttonText}>add comment</Text>
+                <Text style={styles.buttonText}>отправить комментарий</Text>
               </TouchableOpacity>
           </View>
       </View>
@@ -171,7 +165,7 @@ export default function LivePatternScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   inner: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    backgroundColor: 'rgba(255,255,255,0.9)',
     alignItems: 'center',
   },
   button: {
@@ -197,6 +191,16 @@ const styles = StyleSheet.create({
     color: "#921bfa",
     alignSelf: 'center',
     textTransform: 'uppercase'
+  },
+  section: {
+    marginTop: hp(3),
+    marginBottom: hp(1),
+    width: wp(100),
+    fontFamily: 'NunitoBold',
+    fontSize: RFValue(20, height),
+    color: "#921bfa",
+    textAlign: 'center',
+    textTransform: 'uppercase',
   },
   text: {
     fontFamily: 'NunitoBold',

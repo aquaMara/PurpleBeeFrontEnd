@@ -13,7 +13,13 @@
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
       ]
-    ]
+    ],
+    "android": {
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.aquam.purplebee"
+    }
   },
   "name": "purplebee"
 }
